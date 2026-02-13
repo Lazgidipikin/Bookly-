@@ -1,0 +1,7 @@
+{
+  "name": "Bookly Sales Automation",
+  "description": "An AI-powered sales management tool for social commerce vendors to capture orders from chat apps, manage inventory, and track business analytics.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
