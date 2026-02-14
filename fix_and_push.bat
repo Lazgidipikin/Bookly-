@@ -1,14 +1,14 @@
 @echo off
 echo ==========================================
-echo  Finalizing Bookly App Update
+echo  Finalizing Bookly App Update (Fixing Build Error)
 echo ==========================================
 echo.
-echo 1. Ensuring TailwindCSS is installed...
-call npm install -D tailwindcss postcss autoprefixer
+echo 1. Fixing TailwindCSS Version (Downgrading to v3)...
+call npm install -D tailwindcss@3.4.17 postcss autoprefixer
 echo.
 echo 2. Committing changes...
 git add .
-git commit -m "fix: ensure tailwindcss dependencies are installed"
+git commit -m "fix: downgrade to tailwindcss v3 to fix build error"
 echo.
 echo 3. Pushing to GitHub...
 git push
@@ -18,7 +18,7 @@ call npm run build
 echo.
 echo ==========================================
 echo  Status Check:
-echo  - If Build says "Done", you are ready to Deploy on Vercel!
-echo  - If GitHub push says "Everything up-to-date", you are good!
+echo  - If verify build says "Done", you are ready!
+echo  - The "Red X" on GitHub should turn Green.
 echo ==========================================
 pause
