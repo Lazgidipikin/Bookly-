@@ -21,7 +21,7 @@ export const extractOrderFromText = async (text: string): Promise<any> => {
   return {
     customerName: "Guest Customer",
     items: [
-      { name: isCap ? 'Native Cap' : 'Fashion Item', quantity: 1, price: parseInt(amount) || 5000, id: Date.now().toString() }
+      { id: Date.now().toString(), name: isCap ? 'Native Cap' : 'Fashion Item', quantity: 1, price: parseInt(amount) || 5000 }
     ],
     totalAmount: parseInt(amount) || 5000,
     deliveryFee: 1500,

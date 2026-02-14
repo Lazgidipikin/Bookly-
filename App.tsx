@@ -66,9 +66,14 @@ const App: React.FC = () => {
   const [showAICapture, setShowAICapture] = useState(false);
 
   // Manual Sale Form State
-  const [manualSaleForm, setManualSaleForm] = useState({
+  const [manualSaleForm, setManualSaleForm] = useState<{
+    customerName: string;
+    items: { id: string; name: string; quantity: number; price: number }[];
+    note: string;
+    source: string;
+  }>({
     customerName: 'Guest',
-    amount: '',
+    items: [{ id: '1', name: 'Item 1', quantity: 1, price: 0 }],
     note: '',
     source: 'Walk-in'
   });
@@ -99,13 +104,14 @@ const App: React.FC = () => {
 
   const handleManualSaleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const amount = parseFloat(manualSaleForm.amount);
-    if (amount > 0) {
+    const totalAmount = manualSaleForm.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+    if (totalAmount > 0) {
       const newOrder: Order = {
         id: Date.now().toString(),
         customerName: manualSaleForm.customerName,
-        items: [], // Simplified for manual amount entry
-        total: amount,
+        items: manualSaleForm.items.map(i => ({ ...i, variant: 'Standard', id: i.id || Date.now().toString() })),
+        total: totalAmount,
         date: new Date().toISOString(),
         status: 'Paid',
         source: manualSaleForm.source as any,
@@ -114,9 +120,31 @@ const App: React.FC = () => {
       };
       setState(prev => ({ ...prev, orders: [newOrder, ...prev.orders] }));
       setShowManualSale(false);
-      setManualSaleForm({ customerName: 'Guest', amount: '', note: '', source: 'Walk-in' });
+      setManualSaleForm({ customerName: 'Guest', items: [{ id: Date.now().toString(), name: 'Item 1', quantity: 1, price: 0 }], note: '', source: 'Walk-in' });
       alert('Sale Recorded Successfully!');
     }
+  };
+
+  const addItemToSale = () => {
+    setManualSaleForm(prev => ({
+      ...prev,
+      items: [...prev.items, { id: Date.now().toString(), name: '', quantity: 1, price: 0 }]
+    }));
+  };
+
+  const updateSaleItem = (id: string, field: string, value: any) => {
+    setManualSaleForm(prev => ({
+      ...prev,
+      items: prev.items.map(item => item.id === id ? { ...item, [field]: value } : item)
+    }));
+  };
+
+  const removeSaleItem = (id: string) => {
+    if (manualSaleForm.items.length === 1) return;
+    setManualSaleForm(prev => ({
+      ...prev,
+      items: prev.items.filter(item => item.id !== id)
+    }));
   };
 
   const handleAICapture = async () => {
@@ -130,18 +158,17 @@ const App: React.FC = () => {
       if (result && result.totalAmount) {
         setManualSaleForm({
           customerName: result.customerName || 'Unknown',
-          amount: result.totalAmount.toString(),
-          note: `Extracted: ${result.items?.map((i: any) => i.name).join(', ')}`,
+          items: result.items || [],
+          note: `Extracted from: ${result.source}`,
           source: result.source || 'Other'
         });
         setShowAICapture(false);
         setShowManualSale(true);
       } else {
         // Fallback demo logic if API fails
-        const mockAmount = aiInputText.match(/\d+/);
         setManualSaleForm({
           customerName: 'Extracted Customer',
-          amount: mockAmount ? mockAmount[0] : '',
+          items: [{ id: '1', name: 'Unknown Item', quantity: 1, price: 0 }],
           note: aiInputText.substring(0, 50) + '...',
           source: 'WhatsApp'
         });
@@ -227,13 +254,35 @@ const App: React.FC = () => {
               <button onClick={() => setShowManualSale(false)} className="w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center text-slate-500"><i className="fa-solid fa-xmark"></i></button>
             </div>
             <form onSubmit={handleManualSaleSubmit} className="space-y-4">
-              <div className="space-y-1">
-                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Amount</label>
-                <input type="number" required value={manualSaleForm.amount} onChange={e => setManualSaleForm({ ...manualSaleForm, amount: e.target.value })} className="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-2xl font-black text-slate-900 outline-none focus:ring-2 focus:ring-emerald-500" placeholder="0.00" autoFocus />
-              </div>
-              <div className="space-y-1">
-                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Customer Name</label>
-                <input type="text" value={manualSaleForm.customerName} onChange={e => setManualSaleForm({ ...manualSaleForm, customerName: e.target.value })} className="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-sm font-bold outline-none" placeholder="Guest" />
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Items</label>
+                  <button type="button" onClick={addItemToSale} className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest bg-indigo-50 px-2 py-1 rounded-lg">+ Add Item</button>
+                </div>
+                <div className="space-y-2 max-h-[160px] overflow-y-auto pr-1">
+                  {manualSaleForm.items.map((item, index) => (
+                    <div key={item.id} className="flex gap-2 items-start">
+                      <div className="flex-1 space-y-1">
+                        <input type="text" required placeholder="Item Name" value={item.name} onChange={e => updateSaleItem(item.id, 'name', e.target.value)} className="w-full bg-slate-50 border-none rounded-lg px-3 py-2 text-xs font-bold outline-none focus:ring-1 focus:ring-indigo-500" />
+                      </div>
+                      <div className="w-16 space-y-1">
+                        <input type="number" required min="1" placeholder="Qty" value={item.quantity} onChange={e => updateSaleItem(item.id, 'quantity', parseInt(e.target.value) || 1)} className="w-full bg-slate-50 border-none rounded-lg px-2 py-2 text-xs font-bold outline-none text-center" />
+                      </div>
+                      <div className="w-24 space-y-1">
+                        <input type="number" required min="0" placeholder="Price" value={item.price} onChange={e => updateSaleItem(item.id, 'price', parseFloat(e.target.value) || 0)} className="w-full bg-slate-50 border-none rounded-lg px-2 py-2 text-xs font-bold outline-none text-right" />
+                      </div>
+                      {manualSaleForm.items.length > 1 && (
+                        <button type="button" onClick={() => removeSaleItem(item.id)} className="pt-2 text-slate-300 hover:text-red-500"><i className="fa-solid fa-trash-can"></i></button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+                <div className="flex justify-between items-center pt-2 border-t border-slate-50">
+                  <span className="text-xs font-bold text-slate-500">Total</span>
+                  <span className="text-xl font-black text-slate-900">
+                    {(manualSaleForm.items.reduce((sum, item) => sum + (item.price * item.quantity), 0)).toLocaleString('en-NG', { style: 'currency', currency: 'NGN' })}
+                  </span>
+                </div>
               </div>
               <div className="space-y-1">
                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Source</label>
