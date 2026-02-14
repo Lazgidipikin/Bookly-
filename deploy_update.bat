@@ -1,17 +1,23 @@
 @echo off
 echo ==========================================
-echo  Deploying Bookly v2.2 (Inventory Linking)
+echo  Deploying Bookly v2.3 (Complete Rebrand)
 echo ==========================================
 echo.
-echo 1. Adding inventory linking features...
+echo Updates included:
+echo - Itemized sales cart
+echo - Inventory linking
+echo - Teal rebrand (Tumm design)
+echo - Logo consistency
+echo.
+echo 1. Adding all changes...
 git add .
-git commit -m "feat: link manual sale items to inventory products"
+git commit -m "feat: complete rebrand with teal theme, itemized sales, and inventory linking"
 echo.
 echo 2. Pushing to GitHub (Triggers Vercel)...
 git push
 echo.
 echo ==========================================
-echo  DEPLOYMENT SENT!
-echo  Check Vercel dashboard in 1-2 minutes.
+echo  DEPLOYMENT COMPLETE!
+echo  Check Vercel in 1-2 minutes.
 echo ==========================================
 pause
