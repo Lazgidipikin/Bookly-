@@ -1,11 +1,11 @@
 @echo off
 echo ==========================================
-echo  Deploying Itemized Sales Feature (Bookly v2.1)
+echo  Deploying Bookly v2.2 (Inventory Linking)
 echo ==========================================
 echo.
-echo 1. Adding simplified cart features...
+echo 1. Adding inventory linking features...
 git add .
-git commit -m "feat: implement itemized sales cart (manual & AI)"
+git commit -m "feat: link manual sale items to inventory products"
 echo.
 echo 2. Pushing to GitHub (Triggers Vercel)...
 git push

@@ -263,7 +263,45 @@ const App: React.FC = () => {
                   {manualSaleForm.items.map((item, index) => (
                     <div key={item.id} className="flex gap-2 items-start">
                       <div className="flex-1 space-y-1">
-                        <input type="text" required placeholder="Item Name" value={item.name} onChange={e => updateSaleItem(item.id, 'name', e.target.value)} className="w-full bg-slate-50 border-none rounded-lg px-3 py-2 text-xs font-bold outline-none focus:ring-1 focus:ring-indigo-500" />
+                        {state.products.length > 0 ? (
+                          <div className="relative">
+                            <select
+                              value={state.products.find(p => p.name === item.name) ? item.name : 'custom'}
+                              onChange={(e) => {
+                                const selected = state.products.find(p => p.name === e.target.value);
+                                if (selected) {
+                                  updateSaleItem(item.id, 'name', selected.name);
+                                  updateSaleItem(item.id, 'price', selected.sellingPrice);
+                                } else {
+                                  // Keep current name if switching to custom or just clear it? 
+                                  // Better to handle "custom" separately or just allow text editing if "Custom" is picked.
+                                  // For MVP, if "custom" is picked, we might clear name or set to empty.
+                                  if (e.target.value === 'custom') updateSaleItem(item.id, 'name', '');
+                                }
+                              }}
+                              className="w-full bg-slate-50 border-none rounded-lg px-3 py-2 text-xs font-bold outline-none focus:ring-1 focus:ring-indigo-500 appearance-none"
+                            >
+                              <option value="custom">Custom / Select Product...</option>
+                              {state.products.map(p => (
+                                <option key={p.id} value={p.name}>
+                                  {p.name}
+                                </option>
+                              ))}
+                            </select>
+                            {/* If custom or not in list, show text input to edit name */}
+                            {(!state.products.find(p => p.name === item.name)) && (
+                              <input
+                                type="text"
+                                placeholder="Enter Custom Name"
+                                value={item.name}
+                                onChange={e => updateSaleItem(item.id, 'name', e.target.value)}
+                                className="mt-1 w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-bold outline-none focus:ring-1 focus:ring-indigo-500"
+                              />
+                            )}
+                          </div>
+                        ) : (
+                          <input type="text" required placeholder="Item Name" value={item.name} onChange={e => updateSaleItem(item.id, 'name', e.target.value)} className="w-full bg-slate-50 border-none rounded-lg px-3 py-2 text-xs font-bold outline-none focus:ring-1 focus:ring-indigo-500" />
+                        )}
                       </div>
                       <div className="w-16 space-y-1">
                         <input type="number" required min="1" placeholder="Qty" value={item.quantity} onChange={e => updateSaleItem(item.id, 'quantity', parseInt(e.target.value) || 1)} className="w-full bg-slate-50 border-none rounded-lg px-2 py-2 text-xs font-bold outline-none text-center" />
