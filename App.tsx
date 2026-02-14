@@ -196,19 +196,19 @@ const App: React.FC = () => {
   if (!state.isLoggedIn) return <Login onLogin={() => setState(p => ({ ...p, isLoggedIn: true }))} />;
 
   return (
-    <div className="flex flex-col h-screen max-w-md mx-auto bg-slate-50 relative shadow-2xl overflow-hidden font-sans">
+    <div className="flex flex-col h-screen max-w-md mx-auto bg-gray-50 relative shadow-2xl overflow-hidden" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif' }}>
       {/* Header */}
       <header className="bg-white px-6 py-4 flex justify-between items-center z-40 sticky top-0 border-b border-slate-100/80 backdrop-blur-md bg-white/90">
         <div>
-          <h1 className="text-lg font-extrabold tracking-tighter text-slate-900 flex items-center gap-2">
-            <span className="w-8 h-8 bg-slate-900 text-white rounded-lg flex items-center justify-center text-sm shadow-md shadow-slate-200">
-              <i className="fa-solid fa-b"></i>
+          <h1 className="text-lg font-extrabold tracking-tight text-slate-900 flex items-center gap-2">
+            <span className="w-9 h-9 bg-teal-500 text-white rounded-xl flex items-center justify-center text-base font-black shadow-md shadow-teal-200">
+              <span>B.</span>
             </span>
-            <span className="truncate max-w-[150px]">{state.profile.name || 'Bookly'}</span>
+            <span className="truncate max-w-[150px] text-slate-800" style={{ fontFamily: 'Inter, sans-serif' }}>{state.profile.name || 'Bookly'}</span>
           </h1>
         </div>
         <div className="flex items-center gap-3">
-          <button onClick={() => setActiveTab('settings')} className="text-slate-400 hover:text-slate-600 transition-colors">
+          <button onClick={() => setActiveTab('settings')} className="text-slate-400 hover:text-teal-500 transition-colors">
             <i className="fa-solid fa-gear text-lg"></i>
           </button>
         </div>
@@ -228,16 +228,16 @@ const App: React.FC = () => {
           <div className="absolute bottom-24 right-6 z-50 flex flex-col items-end gap-3 pointer-events-none">
             <div className={`flex flex-col items-end gap-3 transition-all duration-300 ${showFabMenu ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 translate-y-10 pointer-events-none'}`}>
               <button onClick={() => { setShowFabMenu(false); setShowAICapture(true); }} className="bg-white text-slate-800 px-5 py-3 rounded-2xl shadow-xl font-bold text-xs flex items-center gap-3 hover:bg-slate-50 transition-colors">
-                AI Capture <i className="fa-solid fa-wand-magic-sparkles text-purple-600 text-lg"></i>
+                AI Capture <i className="fa-solid fa-wand-magic-sparkles text-teal-600 text-lg"></i>
               </button>
               <button onClick={() => { setShowFabMenu(false); setShowManualSale(true); }} className="bg-slate-900 text-white px-5 py-3 rounded-2xl shadow-xl font-bold text-xs flex items-center gap-3 hover:bg-slate-800 transition-colors">
-                Manual Sale <i className="fa-solid fa-plus text-emerald-400 text-lg"></i>
+                Manual Sale <i className="fa-solid fa-plus text-teal-400 text-lg"></i>
               </button>
             </div>
 
             <button
               onClick={() => setShowFabMenu(!showFabMenu)}
-              className={`w-14 h-14 rounded-2xl shadow-2xl shadow-indigo-500/30 flex items-center justify-center text-2xl transition-all duration-300 pointer-events-auto ${showFabMenu ? 'bg-slate-900 text-white rotate-45 scale-90' : 'bg-indigo-600 text-white hover:scale-110'}`}
+              className={`w-14 h-14 rounded-2xl shadow-2xl shadow-teal-500/30 flex items-center justify-center text-2xl transition-all duration-300 pointer-events-auto ${showFabMenu ? 'bg-slate-900 text-white rotate-45 scale-90' : 'bg-teal-500 text-white hover:scale-110'}`}
             >
               <i className="fa-solid fa-plus"></i>
             </button>
@@ -257,7 +257,7 @@ const App: React.FC = () => {
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
                   <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Items</label>
-                  <button type="button" onClick={addItemToSale} className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest bg-indigo-50 px-2 py-1 rounded-lg">+ Add Item</button>
+                  <button type="button" onClick={addItemToSale} className="text-[10px] font-bold text-teal-600 uppercase tracking-widest bg-teal-50 px-2 py-1 rounded-lg">+ Add Item</button>
                 </div>
                 <div className="space-y-2 max-h-[160px] overflow-y-auto pr-1">
                   {manualSaleForm.items.map((item, index) => (
@@ -279,7 +279,7 @@ const App: React.FC = () => {
                                   if (e.target.value === 'custom') updateSaleItem(item.id, 'name', '');
                                 }
                               }}
-                              className="w-full bg-slate-50 border-none rounded-lg px-3 py-2 text-xs font-bold outline-none focus:ring-1 focus:ring-indigo-500 appearance-none"
+                              className="w-full bg-slate-50 border-none rounded-lg px-3 py-2 text-xs font-bold outline-none focus:ring-1 focus:ring-teal-500 appearance-none"
                             >
                               <option value="custom">Custom / Select Product...</option>
                               {state.products.map(p => (
@@ -295,12 +295,12 @@ const App: React.FC = () => {
                                 placeholder="Enter Custom Name"
                                 value={item.name}
                                 onChange={e => updateSaleItem(item.id, 'name', e.target.value)}
-                                className="mt-1 w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-bold outline-none focus:ring-1 focus:ring-indigo-500"
+                                className="mt-1 w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-bold outline-none focus:ring-1 focus:ring-teal-500"
                               />
                             )}
                           </div>
                         ) : (
-                          <input type="text" required placeholder="Item Name" value={item.name} onChange={e => updateSaleItem(item.id, 'name', e.target.value)} className="w-full bg-slate-50 border-none rounded-lg px-3 py-2 text-xs font-bold outline-none focus:ring-1 focus:ring-indigo-500" />
+                          <input type="text" required placeholder="Item Name" value={item.name} onChange={e => updateSaleItem(item.id, 'name', e.target.value)} className="w-full bg-slate-50 border-none rounded-lg px-3 py-2 text-xs font-bold outline-none focus:ring-1 focus:ring-teal-500" />
                         )}
                       </div>
                       <div className="w-16 space-y-1">
@@ -376,7 +376,7 @@ const App: React.FC = () => {
 };
 
 const NavButton = ({ active, icon, label, onClick }: { active: boolean, icon: string, label: string, onClick: () => void }) => (
-  <button onClick={onClick} className={`relative flex flex-col items-center gap-1.5 transition-all duration-300 w-16 p-2 rounded-2xl ${active ? 'text-indigo-600 bg-indigo-50' : 'text-slate-400 hover:text-slate-600'}`}>
+  <button onClick={onClick} className={`relative flex flex-col items-center gap-1.5 transition-all duration-300 w-16 p-2 rounded-2xl ${active ? 'text-teal-600 bg-teal-50' : 'text-slate-400 hover:text-teal-500'}`}>
     <i className={`fa-solid ${icon} ${active ? 'text-lg' : 'text-lg'}`}></i>
     <span className={`text-[9px] font-black uppercase tracking-widest ${active ? 'opacity-100' : 'opacity-70'}`}>{label}</span>
   </button>
