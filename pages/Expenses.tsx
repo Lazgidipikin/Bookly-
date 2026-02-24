@@ -79,7 +79,7 @@ const Expenses: React.FC<ExpensesProps> = ({ state, onAddExpense }) => {
                 </div>
             </div>
 
-            {/* Expense Breakdown by Category */}
+            {/* Expense Breakdown + History side-by-side on desktop */}
             {categoryEntries.length > 0 && (
                 <div className="bg-white p-5 rounded-[24px] border border-slate-100 shadow-sm space-y-3">
                     <h3 className="text-xs font-black text-slate-900 uppercase tracking-wide">Breakdown by Category</h3>

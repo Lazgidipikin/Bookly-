@@ -181,7 +181,7 @@ const Customers: React.FC<CustomersProps> = ({ state, onAddCustomer }) => {
       </div>
 
       {/* Customer List */}
-      <div className="space-y-3">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {customers.length === 0 ? (
           <div className="text-center py-16 space-y-4">
             <div className="w-16 h-16 bg-slate-100 rounded-full mx-auto flex items-center justify-center">

@@ -29,22 +29,24 @@ const Settings: React.FC<SettingsProps> = ({ profile, settings, onUpdateProfile,
           <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest">Business Profile</h3>
         </div>
 
-        <SettingField label="Business Name" value={profile.name} onChange={v => onUpdateProfile({ ...profile, name: v })} />
-        <SettingField label="Phone Number" value={profile.phone} onChange={v => onUpdateProfile({ ...profile, phone: v })} />
-        <SettingField label="Email Address" value={profile.email} onChange={v => onUpdateProfile({ ...profile, email: v })} />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <SettingField label="Business Name" value={profile.name} onChange={v => onUpdateProfile({ ...profile, name: v })} />
+          <SettingField label="Phone Number" value={profile.phone} onChange={v => onUpdateProfile({ ...profile, phone: v })} />
+          <SettingField label="Email Address" value={profile.email} onChange={v => onUpdateProfile({ ...profile, email: v })} />
 
-        <div className="space-y-1">
-          <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest pl-1">Currency</label>
-          <select
-            value={profile.currency}
-            onChange={e => onUpdateProfile({ ...profile, currency: e.target.value })}
-            className="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-sm outline-none font-bold text-slate-900 focus:ring-2 focus:ring-indigo-500"
-          >
-            <option value="NGN">NGN (₦)</option>
-            <option value="USD">USD ($)</option>
-            <option value="GBP">GBP (£)</option>
-            <option value="EUR">EUR (€)</option>
-          </select>
+          <div className="space-y-1">
+            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest pl-1">Currency</label>
+            <select
+              value={profile.currency}
+              onChange={e => onUpdateProfile({ ...profile, currency: e.target.value })}
+              className="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-sm outline-none font-bold text-slate-900 focus:ring-2 focus:ring-indigo-500"
+            >
+              <option value="NGN">NGN (₦)</option>
+              <option value="USD">USD ($)</option>
+              <option value="GBP">GBP (£)</option>
+              <option value="EUR">EUR (€)</option>
+            </select>
+          </div>
         </div>
       </div>
 

@@ -76,13 +76,13 @@ const Dashboard: React.FC<DashboardProps> = ({ state, onNav }) => {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <KPICard
           label="Net Profit"
           amount={profit}
           currency={state.profile.currency}
           icon="fa-arrow-trend-up"
-          className="bg-slate-900 text-white col-span-2"
+          className="bg-slate-900 text-white col-span-2 md:col-span-2"
           subtext="After expenses & COGS"
         />
         <KPICard
@@ -136,109 +136,113 @@ const Dashboard: React.FC<DashboardProps> = ({ state, onNav }) => {
         )}
       </div>
 
-      {/* Sales by Channel – Pie-style bar breakdown */}
-      <div className="bg-white p-5 rounded-[24px] shadow-sm border border-slate-100 space-y-4">
-        <div className="flex justify-between items-center">
-          <h3 className="font-bold text-slate-900 text-sm uppercase tracking-wide">Sales by Channel</h3>
-          <span className="text-[10px] font-bold bg-slate-100 px-2 py-1 rounded text-slate-500">{state.orders.length} Orders</span>
-        </div>
+      {/* Bottom Section: side-by-side on desktop */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-        {channelEntries.length > 0 ? (
-          <>
-            {/* Visual pie ring */}
-            <div className="flex justify-center py-2">
-              <div className="relative w-28 h-28">
-                <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
-                  {(() => {
-                    let cumulative = 0;
-                    const colorMap: Record<string, string> = {
-                      'WhatsApp': '#10b981', 'Instagram': '#ec4899', 'Facebook': '#3b82f6',
-                      'TikTok': '#1e293b', 'Walk-in': '#f59e0b', 'Phone Call': '#a855f7', 'Other': '#94a3b8'
-                    };
-                    return channelEntries.map(([name, val]: [string, number]) => {
-                      const pct = (val / channelTotal) * 100;
-                      const offset = cumulative;
-                      cumulative += pct;
-                      return (
-                        <circle
-                          key={name}
-                          cx="18" cy="18" r="15.5"
-                          fill="none"
-                          stroke={colorMap[name] || '#94a3b8'}
-                          strokeWidth="5"
-                          strokeDasharray={`${pct} ${100 - pct}`}
-                          strokeDashoffset={-offset}
-                          strokeLinecap="round"
-                        />
-                      );
-                    });
-                  })()}
-                </svg>
-                <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className="text-lg font-black text-slate-900">{state.orders.length}</span>
-                  <span className="text-[8px] font-bold text-slate-400 uppercase">orders</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Legend */}
-            <div className="space-y-2">
-              {channelEntries.map(([name, val]: [string, number]) => (
-                <div key={name} className="flex items-center justify-between text-xs">
-                  <div className="flex items-center gap-2">
-                    <span className={`w-2.5 h-2.5 rounded-full ${CHANNEL_COLORS[name] || 'bg-slate-400'}`}></span>
-                    <span className="font-bold text-slate-700">{name}</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="text-slate-400 font-medium">{state.profile.currency}{val.toLocaleString()}</span>
-                    <span className="font-black text-slate-600 w-10 text-right">{Math.round((val / channelTotal) * 100)}%</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </>
-        ) : (
-          <div className="text-center py-8 text-slate-400">
-            <i className="fa-solid fa-chart-pie text-3xl mb-2 opacity-50"></i>
-            <p className="text-xs">No sales recorded yet</p>
+        {/* Sales by Channel – Pie-style bar breakdown */}
+        <div className="bg-white p-5 rounded-[24px] shadow-sm border border-slate-100 space-y-4">
+          <div className="flex justify-between items-center">
+            <h3 className="font-bold text-slate-900 text-sm uppercase tracking-wide">Sales by Channel</h3>
+            <span className="text-[10px] font-bold bg-slate-100 px-2 py-1 rounded text-slate-500">{state.orders.length} Orders</span>
           </div>
-        )}
-      </div>
 
-      {/* Recent Orders */}
-      <div className="space-y-3">
-        <div className="flex justify-between items-end px-1">
-          <h3 className="font-bold text-slate-900 text-sm uppercase tracking-wide">Recent Orders</h3>
-          {state.orders.length > 0 && (
-            <button onClick={() => onNav('orders')} className="text-[10px] font-bold text-teal-600 uppercase tracking-widest">
-              View All →
-            </button>
-          )}
-        </div>
-        <div className="space-y-2">
-          {recentOrders.length > 0 ? recentOrders.map(order => (
-            <div key={order.id} className="bg-white p-4 rounded-2xl flex items-center justify-between border border-slate-100/50 shadow-sm">
-              <div className="flex items-center gap-3">
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center border ${order.status === 'Paid' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
-                  order.status === 'Delivered' ? 'bg-blue-50 text-blue-600 border-blue-100' :
-                    'bg-amber-50 text-amber-600 border-amber-100'
-                  }`}>
-                  <i className={`fa-solid ${order.status === 'Paid' ? 'fa-check' :
-                    order.status === 'Delivered' ? 'fa-truck' : 'fa-clock'
-                    }`}></i>
-                </div>
-                <div>
-                  <p className="text-xs font-bold text-slate-900">{order.customerName}</p>
-                  <p className="text-[10px] text-slate-400 font-bold uppercase">
-                    {order.source} • {new Date(order.date).toLocaleDateString('en-NG', { day: 'numeric', month: 'short' })}
-                  </p>
+          {channelEntries.length > 0 ? (
+            <>
+              {/* Visual pie ring */}
+              <div className="flex justify-center py-2">
+                <div className="relative w-28 h-28">
+                  <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
+                    {(() => {
+                      let cumulative = 0;
+                      const colorMap: Record<string, string> = {
+                        'WhatsApp': '#10b981', 'Instagram': '#ec4899', 'Facebook': '#3b82f6',
+                        'TikTok': '#1e293b', 'Walk-in': '#f59e0b', 'Phone Call': '#a855f7', 'Other': '#94a3b8'
+                      };
+                      return channelEntries.map(([name, val]: [string, number]) => {
+                        const pct = (val / channelTotal) * 100;
+                        const offset = cumulative;
+                        cumulative += pct;
+                        return (
+                          <circle
+                            key={name}
+                            cx="18" cy="18" r="15.5"
+                            fill="none"
+                            stroke={colorMap[name] || '#94a3b8'}
+                            strokeWidth="5"
+                            strokeDasharray={`${pct} ${100 - pct}`}
+                            strokeDashoffset={-offset}
+                            strokeLinecap="round"
+                          />
+                        );
+                      });
+                    })()}
+                  </svg>
+                  <div className="absolute inset-0 flex flex-col items-center justify-center">
+                    <span className="text-lg font-black text-slate-900">{state.orders.length}</span>
+                    <span className="text-[8px] font-bold text-slate-400 uppercase">orders</span>
+                  </div>
                 </div>
               </div>
-              <span className="text-sm font-black text-slate-900">+{state.profile.currency}{order.total.toLocaleString()}</span>
+
+              {/* Legend */}
+              <div className="space-y-2">
+                {channelEntries.map(([name, val]: [string, number]) => (
+                  <div key={name} className="flex items-center justify-between text-xs">
+                    <div className="flex items-center gap-2">
+                      <span className={`w-2.5 h-2.5 rounded-full ${CHANNEL_COLORS[name] || 'bg-slate-400'}`}></span>
+                      <span className="font-bold text-slate-700">{name}</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="text-slate-400 font-medium">{state.profile.currency}{val.toLocaleString()}</span>
+                      <span className="font-black text-slate-600 w-10 text-right">{Math.round((val / channelTotal) * 100)}%</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          ) : (
+            <div className="text-center py-8 text-slate-400">
+              <i className="fa-solid fa-chart-pie text-3xl mb-2 opacity-50"></i>
+              <p className="text-xs">No sales recorded yet</p>
             </div>
-          )) : (
-            <p className="text-xs text-slate-400 text-center py-4">No orders yet. Record a sale to get started!</p>
           )}
+        </div>
+
+        {/* Recent Orders */}
+        <div className="space-y-3">
+          <div className="flex justify-between items-end px-1">
+            <h3 className="font-bold text-slate-900 text-sm uppercase tracking-wide">Recent Orders</h3>
+            {state.orders.length > 0 && (
+              <button onClick={() => onNav('orders')} className="text-[10px] font-bold text-teal-600 uppercase tracking-widest">
+                View All →
+              </button>
+            )}
+          </div>
+          <div className="space-y-2">
+            {recentOrders.length > 0 ? recentOrders.map(order => (
+              <div key={order.id} className="bg-white p-4 rounded-2xl flex items-center justify-between border border-slate-100/50 shadow-sm">
+                <div className="flex items-center gap-3">
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center border ${order.status === 'Paid' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
+                    order.status === 'Delivered' ? 'bg-blue-50 text-blue-600 border-blue-100' :
+                      'bg-amber-50 text-amber-600 border-amber-100'
+                    }`}>
+                    <i className={`fa-solid ${order.status === 'Paid' ? 'fa-check' :
+                      order.status === 'Delivered' ? 'fa-truck' : 'fa-clock'
+                      }`}></i>
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-slate-900">{order.customerName}</p>
+                    <p className="text-[10px] text-slate-400 font-bold uppercase">
+                      {order.source} • {new Date(order.date).toLocaleDateString('en-NG', { day: 'numeric', month: 'short' })}
+                    </p>
+                  </div>
+                </div>
+                <span className="text-sm font-black text-slate-900">+{state.profile.currency}{order.total.toLocaleString()}</span>
+              </div>
+            )) : (
+              <p className="text-xs text-slate-400 text-center py-4">No orders yet. Record a sale to get started!</p>
+            )}
+          </div>
         </div>
       </div>
     </div>

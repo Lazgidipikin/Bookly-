@@ -19,6 +19,15 @@ const INITIAL_PROFILE: BusinessProfile = {
   vipThreshold: 5
 };
 
+const NAV_ITEMS = [
+  { id: 'dashboard', icon: 'fa-chart-pie', label: 'Home' },
+  { id: 'orders', icon: 'fa-receipt', label: 'Orders' },
+  { id: 'inventory', icon: 'fa-layer-group', label: 'Stock' },
+  { id: 'customers', icon: 'fa-users', label: 'CRM' },
+  { id: 'expenses', icon: 'fa-wallet', label: 'Costs' },
+  { id: 'settings', icon: 'fa-gear', label: 'Settings' },
+];
+
 const App: React.FC = () => {
   const [state, setState] = useState<AppState>(() => {
     const saved = localStorage.getItem('bookly_mvp_state_v4');
@@ -31,13 +40,13 @@ const App: React.FC = () => {
       expenses: [],
       settings: { showFab: true, soundEnabled: false }
     };
-    // Ensure settings exist for legacy state
     if (!initialState.settings) initialState.settings = { showFab: true, soundEnabled: false };
     return { ...initialState, isOnline: navigator.onLine };
   });
 
   const [activeTab, setActiveTab] = useState('dashboard');
   const [showFabMenu, setShowFabMenu] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   // Modals
   const [showManualSale, setShowManualSale] = useState(false);
@@ -144,7 +153,6 @@ const App: React.FC = () => {
         setShowAICapture(false);
         setShowManualSale(true);
       } else {
-        // No products matched — show helpful message
         const productNames = state.products.map(p => p.name).join(', ');
         alert(
           state.products.length === 0
@@ -175,36 +183,108 @@ const App: React.FC = () => {
   if (!state.isLoggedIn) return <Login onLogin={() => setState(p => ({ ...p, isLoggedIn: true }))} />;
 
   return (
-    <div className="flex flex-col h-screen max-w-md mx-auto bg-gray-50 relative shadow-2xl overflow-hidden" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif' }}>
-      {/* Header */}
-      <header className="bg-white px-6 py-4 flex justify-between items-center z-40 sticky top-0 border-b border-slate-100/80 backdrop-blur-md bg-white/90">
-        <div>
-          <h1 className="text-lg font-extrabold tracking-tight text-slate-900 flex items-center gap-2">
-            <span className="w-9 h-9 bg-teal-500 text-white rounded-xl flex items-center justify-center text-base font-black shadow-md shadow-teal-200">
-              <span>B.</span>
-            </span>
-            <span className="truncate max-w-[150px] text-slate-800" style={{ fontFamily: 'Inter, sans-serif' }}>{state.profile.name || 'Bookly'}</span>
-          </h1>
+    <div className="flex h-screen bg-gray-50 overflow-hidden" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif' }}>
+
+      {/* ── SIDEBAR NAV (tablet + desktop only) ── */}
+      <aside className={`hidden md:flex flex-col bg-white border-r border-slate-100 z-40 transition-all duration-300 shrink-0 ${sidebarCollapsed ? 'w-[72px]' : 'w-[220px]'}`}>
+        {/* Logo */}
+        <div className="flex items-center gap-3 px-4 py-5 border-b border-slate-50">
+          <span className="w-9 h-9 bg-teal-500 text-white rounded-xl flex items-center justify-center text-base font-black shadow-md shadow-teal-200 shrink-0">
+            <span>B.</span>
+          </span>
+          {!sidebarCollapsed && (
+            <span className="font-extrabold tracking-tight text-slate-900 truncate text-sm">{state.profile.name || 'Bookly'}</span>
+          )}
         </div>
-        <div className="flex items-center gap-3">
-          <button onClick={() => setActiveTab('settings')} className="text-slate-400 hover:text-teal-500 transition-colors">
-            <i className="fa-solid fa-gear text-lg"></i>
+
+        {/* Nav Items */}
+        <nav className="flex-1 py-4 space-y-1 px-2 overflow-y-auto">
+          {NAV_ITEMS.map(item => (
+            <button
+              key={item.id}
+              onClick={() => setActiveTab(item.id)}
+              className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 group ${activeTab === item.id
+                ? 'bg-teal-500 text-white shadow-md shadow-teal-200'
+                : 'text-slate-500 hover:bg-slate-50 hover:text-teal-600'
+                }`}
+            >
+              <i className={`fa-solid ${item.icon} text-base shrink-0 ${activeTab === item.id ? '' : 'group-hover:scale-110 transition-transform'}`}></i>
+              {!sidebarCollapsed && (
+                <span className="text-xs font-black uppercase tracking-widest">{item.label}</span>
+              )}
+            </button>
+          ))}
+        </nav>
+
+        {/* Collapse Toggle */}
+        <div className="border-t border-slate-50 p-3">
+          <button
+            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+            className="w-full flex items-center justify-center gap-2 py-2 rounded-xl text-slate-400 hover:text-teal-600 hover:bg-slate-50 transition-all"
+          >
+            <i className={`fa-solid fa-chevron-${sidebarCollapsed ? 'right' : 'left'} text-xs`}></i>
+            {!sidebarCollapsed && <span className="text-[10px] font-bold uppercase tracking-widest">Collapse</span>}
           </button>
         </div>
-      </header>
+      </aside>
 
-      <main className="flex-1 overflow-y-auto pb-32 pt-4 px-4 scroll-smooth no-scrollbar">
-        {renderContent()}
-      </main>
+      {/* ── MAIN AREA ── */}
+      <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
 
-      {/* Floating Action Button */}
+        {/* Header (mobile: sticky top bar; desktop: top bar inside main) */}
+        <header className="bg-white/90 backdrop-blur-md border-b border-slate-100/80 px-4 md:px-6 py-3 md:py-4 flex justify-between items-center z-30 sticky top-0">
+          <div className="flex items-center gap-3">
+            {/* Mobile logo */}
+            <div className="flex md:hidden items-center gap-2">
+              <span className="w-8 h-8 bg-teal-500 text-white rounded-xl flex items-center justify-center text-sm font-black shadow-md shadow-teal-200 shrink-0">
+                <span>B.</span>
+              </span>
+              <span className="font-extrabold tracking-tight text-slate-900 text-base truncate max-w-[130px]">{state.profile.name || 'Bookly'}</span>
+            </div>
+            {/* Desktop breadcrumb */}
+            <div className="hidden md:block">
+              <h2 className="text-lg font-black text-slate-900 capitalize tracking-tight">
+                {NAV_ITEMS.find(n => n.id === activeTab)?.label || 'Dashboard'}
+              </h2>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            {/* Quick add button on desktop */}
+            <button
+              onClick={() => setShowManualSale(true)}
+              className="hidden md:flex items-center gap-2 bg-teal-500 text-white px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest shadow-md shadow-teal-200 hover:bg-teal-600 transition-all"
+            >
+              <i className="fa-solid fa-plus"></i> Record Sale
+            </button>
+            <button
+              onClick={() => setShowAICapture(true)}
+              className="hidden md:flex items-center gap-2 bg-slate-100 text-slate-700 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-slate-200 transition-all"
+            >
+              <i className="fa-solid fa-wand-magic-sparkles text-purple-600"></i> AI Capture
+            </button>
+            {/* Mobile settings shortcut */}
+            <button onClick={() => setActiveTab('settings')} className="flex md:hidden text-slate-400 hover:text-teal-500 transition-colors">
+              <i className="fa-solid fa-gear text-lg"></i>
+            </button>
+          </div>
+        </header>
+
+        {/* Page Content */}
+        <main className="flex-1 overflow-y-auto pb-24 md:pb-8 pt-4 px-4 md:px-6 lg:px-8 scroll-smooth no-scrollbar">
+          <div className="max-w-6xl mx-auto">
+            {renderContent()}
+          </div>
+        </main>
+      </div>
+
+      {/* ── FLOATING ACTION BUTTON (mobile only) ── */}
       {activeTab === 'dashboard' && state.settings.showFab && (
         <>
           {showFabMenu && (
-            <div className="absolute inset-0 bg-slate-900/20 backdrop-blur-sm z-40 transition-all" onClick={() => setShowFabMenu(false)}></div>
+            <div className="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-40 md:hidden" onClick={() => setShowFabMenu(false)}></div>
           )}
 
-          <div className="absolute bottom-24 right-6 z-50 flex flex-col items-end gap-3 pointer-events-none">
+          <div className="fixed bottom-24 right-6 z-50 flex flex-col items-end gap-3 pointer-events-none md:hidden">
             <div className={`flex flex-col items-end gap-3 transition-all duration-300 ${showFabMenu ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 translate-y-10 pointer-events-none'}`}>
               <button onClick={() => { setShowFabMenu(false); setShowAICapture(true); }} className="bg-white text-slate-800 px-5 py-3 rounded-2xl shadow-xl font-bold text-xs flex items-center gap-3 hover:bg-slate-50 transition-colors">
                 AI Capture <i className="fa-solid fa-wand-magic-sparkles text-teal-600 text-lg"></i>
@@ -227,7 +307,7 @@ const App: React.FC = () => {
       {/* Manual Sale Modal */}
       {showManualSale && (
         <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center sm:p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in">
-          <div className="bg-white w-full max-w-[400px] rounded-t-[32px] sm:rounded-[32px] p-6 animate-in slide-in-from-bottom-10">
+          <div className="bg-white w-full max-w-[420px] rounded-t-[32px] sm:rounded-[32px] p-6 animate-in slide-in-from-bottom-10">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-lg font-black text-slate-900 uppercase tracking-tight">Record Sale</h3>
               <button onClick={() => setShowManualSale(false)} className="w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center text-slate-500"><i className="fa-solid fa-xmark"></i></button>
@@ -252,9 +332,6 @@ const App: React.FC = () => {
                                   updateSaleItem(item.id, 'name', selected.name);
                                   updateSaleItem(item.id, 'price', selected.sellingPrice);
                                 } else {
-                                  // Keep current name if switching to custom or just clear it? 
-                                  // Better to handle "custom" separately or just allow text editing if "Custom" is picked.
-                                  // For MVP, if "custom" is picked, we might clear name or set to empty.
                                   if (e.target.value === 'custom') updateSaleItem(item.id, 'name', '');
                                 }
                               }}
@@ -262,12 +339,9 @@ const App: React.FC = () => {
                             >
                               <option value="custom">Custom / Select Product...</option>
                               {state.products.map(p => (
-                                <option key={p.id} value={p.name}>
-                                  {p.name}
-                                </option>
+                                <option key={p.id} value={p.name}>{p.name}</option>
                               ))}
                             </select>
-                            {/* If custom or not in list, show text input to edit name */}
                             {(!state.products.find(p => p.name === item.name)) && (
                               <input
                                 type="text"
@@ -319,13 +393,13 @@ const App: React.FC = () => {
       {/* AI Capture Modal */}
       {showAICapture && (
         <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center sm:p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in">
-          <div className="bg-white w-full max-w-[400px] rounded-t-[32px] sm:rounded-[32px] p-6 animate-in slide-in-from-bottom-10">
+          <div className="bg-white w-full max-w-[420px] rounded-t-[32px] sm:rounded-[32px] p-6 animate-in slide-in-from-bottom-10">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-lg font-black text-slate-900 uppercase tracking-tight flex items-center gap-2"><i className="fa-solid fa-wand-magic-sparkles text-purple-600"></i> AI Capture</h3>
               <button onClick={() => setShowAICapture(false)} className="w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center text-slate-500"><i className="fa-solid fa-xmark"></i></button>
             </div>
             <div className="space-y-4">
-              <p className="text-xs text-slate-500 font-medium">Unknown image/text source? Paste the order details below and let AI handle the rest.</p>
+              <p className="text-xs text-slate-500 font-medium">Paste order details below and let AI handle the rest.</p>
               <textarea
                 value={aiInputText}
                 onChange={e => setAiInputText(e.target.value)}
@@ -348,7 +422,6 @@ const App: React.FC = () => {
       {receiptOrder && (
         <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in">
           <div className="bg-white w-full max-w-[380px] rounded-[28px] shadow-2xl animate-in slide-in-from-bottom-10 overflow-hidden">
-            {/* Receipt Header */}
             <div className="bg-teal-500 px-6 py-5 text-center text-white">
               <div className="w-12 h-12 bg-white/20 rounded-full mx-auto flex items-center justify-center mb-3">
                 <i className="fa-solid fa-check text-xl"></i>
@@ -357,9 +430,7 @@ const App: React.FC = () => {
               <p className="text-teal-100 text-xs font-medium mt-1">Invoice #{receiptOrder.id.slice(-6)}</p>
             </div>
 
-            {/* Receipt Body */}
             <div className="px-6 py-5 space-y-4">
-              {/* Business & Customer Info */}
               <div className="flex justify-between items-start text-xs">
                 <div>
                   <p className="font-black text-slate-900">{state.profile.name || 'Bookly'}</p>
@@ -371,10 +442,8 @@ const App: React.FC = () => {
                 </div>
               </div>
 
-              {/* Divider */}
               <div className="border-t border-dashed border-slate-200"></div>
 
-              {/* Items */}
               <div className="space-y-2">
                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Items</p>
                 {receiptOrder.items.map((item, idx) => (
@@ -385,29 +454,24 @@ const App: React.FC = () => {
                 ))}
               </div>
 
-              {/* Divider */}
               <div className="border-t border-dashed border-slate-200"></div>
 
-              {/* Total */}
               <div className="flex justify-between items-center">
                 <span className="text-sm font-black text-slate-900 uppercase">Total</span>
                 <span className="text-2xl font-black text-teal-600">{state.profile.currency}{receiptOrder.total.toLocaleString()}</span>
               </div>
 
-              {/* Meta */}
               <div className="flex gap-2 text-[10px] font-bold text-slate-400">
                 <span className="bg-slate-100 px-2 py-1 rounded-lg">{receiptOrder.source}</span>
                 <span className="bg-slate-100 px-2 py-1 rounded-lg">{receiptOrder.paymentMethod}</span>
                 <span className="bg-emerald-50 text-emerald-600 px-2 py-1 rounded-lg">{receiptOrder.status}</span>
               </div>
 
-              {/* Footer Note */}
               {state.profile.footerNote && (
                 <p className="text-center text-[10px] text-slate-400 italic pt-2">{state.profile.footerNote}</p>
               )}
             </div>
 
-            {/* Confirm Button */}
             <div className="px-6 pb-6">
               <button
                 onClick={() => setReceiptOrder(null)}
@@ -420,21 +484,25 @@ const App: React.FC = () => {
         </div>
       )}
 
-      {/* Navigation */}
-      <nav className="absolute bottom-0 left-0 right-0 bg-white border-t border-slate-100 flex justify-around py-3 pb-5 px-1 z-40 max-w-md mx-auto">
-        <NavButton active={activeTab === 'dashboard'} icon="fa-chart-pie" label="Home" onClick={() => setActiveTab('dashboard')} />
-        <NavButton active={activeTab === 'orders'} icon="fa-receipt" label="Orders" onClick={() => setActiveTab('orders')} />
-        <NavButton active={activeTab === 'inventory'} icon="fa-layer-group" label="Stock" onClick={() => setActiveTab('inventory')} />
-        <NavButton active={activeTab === 'customers'} icon="fa-users" label="CRM" onClick={() => setActiveTab('customers')} />
-        <NavButton active={activeTab === 'expenses'} icon="fa-wallet" label="Costs" onClick={() => setActiveTab('expenses')} />
+      {/* ── BOTTOM NAV (mobile only) ── */}
+      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 flex justify-around py-3 pb-5 px-1 z-40 md:hidden">
+        {NAV_ITEMS.filter(n => n.id !== 'settings').map(item => (
+          <NavButton
+            key={item.id}
+            active={activeTab === item.id}
+            icon={item.icon}
+            label={item.label}
+            onClick={() => setActiveTab(item.id)}
+          />
+        ))}
       </nav>
     </div>
   );
 };
 
 const NavButton = ({ active, icon, label, onClick }: { active: boolean, icon: string, label: string, onClick: () => void }) => (
-  <button onClick={onClick} className={`relative flex flex-col items-center gap-1.5 transition-all duration-300 w-16 p-2 rounded-2xl ${active ? 'text-teal-600 bg-teal-50' : 'text-slate-400 hover:text-teal-500'}`}>
-    <i className={`fa-solid ${icon} ${active ? 'text-lg' : 'text-lg'}`}></i>
+  <button onClick={onClick} className={`relative flex flex-col items-center gap-1.5 transition-all duration-300 w-14 p-2 rounded-2xl ${active ? 'text-teal-600 bg-teal-50' : 'text-slate-400 hover:text-teal-500'}`}>
+    <i className={`fa-solid ${icon} text-lg`}></i>
     <span className={`text-[9px] font-black uppercase tracking-widest ${active ? 'opacity-100' : 'opacity-70'}`}>{label}</span>
   </button>
 );
